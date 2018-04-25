@@ -1,7 +1,14 @@
 import {defineEnumProps} from 'fjl-mutable';
 import {assignDeep} from 'fjl';
+import {PAGES_INTERNAL, UUID, UUID_SET} from './Symbols';
+import {uuid} from './utils';
+
+export const isPage = x => x && x instanceof Page;
 
 export default class Page {
+
+    static isPage (x) { return isPage(x); }
+
     constructor (props) {
         defineEnumProps([
             [String, 'label'],
@@ -13,9 +20,11 @@ export default class Page {
             [Boolean,'active'],
             [Boolean,'visible'],
             [String, 'type'],
-            [Object, 'pages'],
-            [Map,    '_pagesMap', new Map()]
+            [Array, 'pages']
         ], this);
         assignDeep(props);
+        this[UUID] = uuid();
+        this[PAGES_INTERNAL] = new Set();   // Set for storing a unique set of add pages.
+        this[UUID_SET] = new Set();         // Set for storing fast list for searching for pages.
     }
 }

@@ -12,7 +12,7 @@ export default class MvcPage extends Page {
             [Object, 'route'],
             [Object, 'routeMatch'],
             [Boolean,'useRouteMatch', false],
-            [Object, 'router'],
+            [Object, 'router']
         ], this);
         assignDeep(this, props);
         this.type = 'mvc';

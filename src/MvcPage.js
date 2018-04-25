@@ -1,4 +1,4 @@
-import Page, {addPagesFromObj} from './Page';
+import Page from './Page';
 import {defineEnumProps$} from 'fjl-mutable';
 import {assignDeep} from 'fjl';
 
@@ -15,7 +15,6 @@ export default class MvcPage extends Page {
             [Object, 'router'],
         ], this);
         assignDeep(this, props);
-        addPagesFromObj(this.pages, this);
         this.type = 'mvc';
     }
 }

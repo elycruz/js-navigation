@@ -1,4 +1,4 @@
-import Page, {addPagesFromObj} from "./Page";
+import Page from "./Page";
 import {defineEnumProps$} from 'fjl-mutable';
 import {assignDeep} from 'fjl';
 
@@ -9,7 +9,6 @@ export default class UriPage extends Page {
             [String, 'uri', '#']
         ], this);
         assignDeep(this, props);
-        addPagesFromObj(this.pages, this);
         this.type = 'uri';
     }
 }

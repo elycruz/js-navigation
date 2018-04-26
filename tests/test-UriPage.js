@@ -1,6 +1,7 @@
 import UriPage from '../src/UriPage';
 import Page from '../src/Page';
-import {log, peek, error, jsonClone} from 'fjl';
+import {log, jsonClone} from 'fjl';
+import exampleNavConfig1 from './fixtures/example-navigation-1.json';
 import util from 'util';
 
 describe ('#UriPage', () => {
@@ -10,29 +11,13 @@ describe ('#UriPage', () => {
     ;
 
     test ('should be an instance of `Page`', () => {
-        const instance = new UriPage({
-            uri: '/hello-world',
-            pages: [
-                {
-                    label: 'Hello World Page',
-                    uri: '/hello-world-page'
-                },
-                {
-                    label: 'Hello World Page 2',
-                    uri: 'hello-world-page-2',
-                    pages: [
-                        {
-                            label: 'Other Link',
-                            uri: '/other-link'
-                        }
-                    ]
-                }
-            ]
-        });
-
-        util.inspect(jsonClone(instance), {depth: 10});
-
+        const instance = new UriPage(exampleNavConfig1);
+        log(util.inspect(jsonClone(instance), {depth: 10}));
         expect(instance).toBeInstanceOf(Page);
+    });
+
+    test ('It\'s `type` property should be set to "uri"', () => {
+        expect((new UriPage()).type).toEqual('uri');
     });
 
     test ('should have expected properties that only allow expected types', () => {

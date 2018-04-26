@@ -1,0 +1,19 @@
+{
+  "uri": "/hello-world",
+  "pages": [
+    {
+      "label": "Hello World Page",
+      "uri": "/hello-world-page"
+    },
+    {
+      "label": "Hello World Page 2",
+      "uri": "hello-world-page-2",
+      "pages": [
+        {
+          "label": "Other Link",
+          "uri": "/other-link"
+        }
+      ]
+    }
+  ]
+}

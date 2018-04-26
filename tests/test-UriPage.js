@@ -4,6 +4,11 @@ import {log, peek, error, jsonClone} from 'fjl';
 import util from 'util';
 
 describe ('#UriPage', () => {
+    const propTypeAndNameList = [
+            [String, 'uri']
+        ]
+    ;
+
     test ('should be an instance of `Page`', () => {
         const instance = new UriPage({
             uri: '/hello-world',
@@ -29,4 +34,17 @@ describe ('#UriPage', () => {
 
         expect(instance).toBeInstanceOf(Page);
     });
+
+    test ('should have expected properties that only allow expected types', () => {
+        propTypeAndNameList.forEach(([Type, key]) => {
+            const page = new UriPage();
+            const someValue = Type();
+            expect(page.hasOwnProperty(key)).toEqual(true);
+            page[key] = someValue;
+            expect(page[key]).toEqual(someValue);
+            expect(() => { page[key] = null; }).toThrow(Error);
+        });
+    });
+
+
 });

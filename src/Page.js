@@ -21,8 +21,13 @@ export default class Page {
             [Array, 'pages']
         ], this);
         assignDeep(props);
-        this[UUID] = uuid();
-        this[PAGES_SET_INTERNAL] = new Set();   // Set for storing a unique set of add pages.
-        this[UUID_SET] = new Set();         // Set for storing fast list for searching for pages.
+
+        // Set privates
+        Object.defineProperties(this, {
+            [UUID]: {value: uuid()},
+            [PAGES_SET_INTERNAL]: {value: new Set()}, // Set for storing a unique set of add pages.
+            [UUID_SET]: {value: new Set()}            // Set for storing fast list for searching for pages.
+        });
+
     }
 }

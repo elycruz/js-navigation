@@ -12,7 +12,7 @@ export default class Page {
             [String, 'label'],
             [String, 'fragment'],
             [Object, 'htmlAttribs'],
-            [Number, 'listOrder'],
+            [Number, 'order'],
             [String, 'resource'],
             [String, 'privilege'],
             [Boolean,'active'],

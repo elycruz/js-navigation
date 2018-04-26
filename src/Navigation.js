@@ -127,8 +127,8 @@ export default class Navigation extends Page {
         return removePage(pageName, this);
     }
 
-    removePages () {
-        return removePages(this);
+    removePages (pages) {
+        return removePages(pages, this);
     }
 
     removePagesBy (pred) {

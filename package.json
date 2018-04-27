@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "./dist/package/jsNavigation",
   "module": "./dist/package/jsNavigation.mjs",
-  "license": "MIT",
+  "license": "BSD-3-Clause",
   "scripts": {
     "build": "gulp clean && gulp build && yarn test-builds",
     "docs": "gulp jsdoc",

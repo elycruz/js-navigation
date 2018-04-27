@@ -77,5 +77,5 @@ Navigation {
 - Zend/Navigation - https://docs.zendframework.com/zend-navigation/intro/
 
 ## License
-MIT
+BSD 3.0 
 

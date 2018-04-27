@@ -1,9 +1,8 @@
 /**
  * @module jsNavigation.Navigation
  */
-
-import {partition} from 'fjl';
-import {defineEnumProp$} from 'fjl-mutable';
+import {assign, assignDeep, partition, objComplement as complement} from 'fjl';
+import {defineEnumProps$} from 'fjl-mutable';
 import MvcPage from './MvcPage';
 import UriPage from './UriPage';
 import Page, {isPage} from './Page';
@@ -22,40 +21,29 @@ export const
             (new (page.type === 'mvc' ? MvcPage : UriPage)(page)),
 
     addPage = (page, container) => {
-        const _page = normalizePage(page);
+        const {orderChanged, activeChanged} = container,
+            _page = normalizePage(page);
+        _page.parent = container;
+        _page.orderChanged = orderChanged;
+        _page.activeChanged = activeChanged;
         getPageSetFor(container).add(_page);
         return [_page, container];
     },
 
-    addPages = (pages, container) => {
+    addPages = (pages, parent) => {
         if (!pages) {
-            return container;
+            return parent;
         }
 
-        container.pages = pages.map(page => {
+        parent.pages = pages.map(page => {
             const _isPage = isPage(page);
-            if (_isPage && hasPage(page, container)) {
+            if (_isPage && hasPage(page, parent)) {
                 return page;
             }
-
-            if (_isPage) {
-                if (!page.parent) {
-                    page.parent = container;
-                }
-                if (page.pages) {
-                    return addPages(page.pages, page);
-                }
-                return page;
-            }
-
-            const [_page] = addPage(page, container);
-
-            _page.parent = container;
-
+            const [_page] = addPage(page, parent);
             if (_page.pages) {
                 addPages(_page.pages, _page);
             }
-
             return _page;
         });
     },
@@ -113,18 +101,30 @@ export const
 ;
 
 export default class Navigation extends Page {
-    constructor (pages, props) {
-        super(props);
-        defineEnumProp$(Boolean, 'needsOrdering', false, [this]);
+    constructor (props) {
+        super();
+
+        // Define props
+        defineEnumProps$([
+            [Boolean, 'needsOrdering', false],
+            [Boolean, 'needsActivityEvaluate', false]
+        ], this);
+
+        // Define read-only prop
         Object.defineProperty(this, 'size', {
             get: function () { return this[PAGES_SET_INTERNAL].size; },
             enumerable: true
         });
-        addPages(pages, this);
-    }
 
-    setNeedsOrdering () {
-        this.needsOrdering = true;
-    }
+        // Listeners (not defined via 'definePropert(ies|y)' so we can
+        // eliminate one functional call (getter/setter etc...)
+        this.orderChanged = () => { this.needsOrdering = true; };
+        this.activeChanged = () => { this.needsActivityEvaluate = true; };
 
+        // Merge incoming props
+        if (props) {
+            assignDeep(complement({pages: null}, props));
+            addPages(props.pages, this);
+        }
+    }
 }

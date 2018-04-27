@@ -11,8 +11,9 @@ describe ('#Page', () => {
         [String, 'privilege'],
         [Boolean, 'active'],
         [Boolean, 'visible'],
-        [String, 'type'],
-        [Array, 'pages']];
+        [String, 'type']
+
+    ];
 
     test ('should be an instance of `Page`', () => {
         expect(new Page()).toBeInstanceOf(Page);

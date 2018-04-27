@@ -67,6 +67,10 @@ Navigation {
 
 ```
 
+## Other alpha-version Considerations
+- Consider making the structure more functional (mappable, foldable etc. (look into what to consider)).
+@todo
+
 ## Docs
 @todo 
 

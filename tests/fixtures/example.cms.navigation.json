@@ -1,106 +1,104 @@
 {
-  "config": {
-    "navigation": {
-      "main": {
-        "label": "Main",
-        "uri": "/edm-admin/main/index",
-        "resource": "main",
-        "privilege": "index"
-      },
-      "content": {
-        "label": "Content",
-        "uri": "/edm-admin",
-        "pages": {
-          "posts": {
-            "label": "Posts",
-            "uri": "/edm-admin/post/index",
-            "resource": "post",
-            "privilege": "index"
-          },
-          "postCreate": {
-            "label": "New Post",
-            "uri": "/edm-admin/post/create",
-            "resource": "post",
-            "privilege": "create"
-          },
-          "postTags": {
-            "label": "Post Tags",
-            "uri": "/edm-admin/post-tag/index",
-            "resource": "post-tag",
-            "privilege": "index"
-          }
+  "pages": {
+    "main": {
+      "label": "Main",
+      "uri": "/edm-admin/main/index",
+      "resource": "main",
+      "privilege": "index"
+    },
+    "content": {
+      "label": "Content",
+      "uri": "/edm-admin",
+      "pages": {
+        "posts": {
+          "label": "Posts",
+          "uri": "/edm-admin/post/index",
+          "resource": "post",
+          "privilege": "index"
+        },
+        "postCreate": {
+          "label": "New Post",
+          "uri": "/edm-admin/post/create",
+          "resource": "post",
+          "privilege": "create"
+        },
+        "postTags": {
+          "label": "Post Tags",
+          "uri": "/edm-admin/post-tag/index",
+          "resource": "post-tag",
+          "privilege": "index"
         }
-      },
-      "links": {
-        "label": "Links",
-        "uri": "/edm-admin/link",
-        "resource": "link",
-        "privilege": "index",
-        "pages": {
-          "create": {
-            "label": "New link",
-            "uri": "/edm-admin/link/create",
-            "resource": "link",
-            "privilege": "create"
-          }
+      }
+    },
+    "links": {
+      "label": "Links",
+      "uri": "/edm-admin/link",
+      "resource": "link",
+      "privilege": "index",
+      "pages": {
+        "create": {
+          "label": "New link",
+          "uri": "/edm-admin/link/create",
+          "resource": "link",
+          "privilege": "create"
         }
-      },
-      "viewModules": {
-        "label": "View Modules",
-        "uri": "/edm-admin/view-module/index",
-        "resource": "view-module",
-        "privilege": "index",
-        "pages": {
-          "plainHtml": {
-            "label": "New Plain Html",
-            "uri": "/edm-admin/plain-html/create",
-            "resource": "plain-html",
-            "privilege": "create"
-          },
-          "menu": {
-            "label": "New Menu",
-            "uri": "/edm-admin/menu/create",
-            "resource": "menu",
-            "privilege": "create"
-          }
+      }
+    },
+    "viewModules": {
+      "label": "View Modules",
+      "uri": "/edm-admin/view-module/index",
+      "resource": "view-module",
+      "privilege": "index",
+      "pages": {
+        "plainHtml": {
+          "label": "New Plain Html",
+          "uri": "/edm-admin/plain-html/create",
+          "resource": "plain-html",
+          "privilege": "create"
+        },
+        "menu": {
+          "label": "New Menu",
+          "uri": "/edm-admin/menu/create",
+          "resource": "menu",
+          "privilege": "create"
         }
-      },
-      "system": {
-        "label": "System",
-        "uri": "/edm-admin",
-        "pages": {
-          "term_taxonomy": {
-            "label": "Term Taxonomies",
-            "uri": "/edm-admin/term-taxonomy/index",
-            "resource": "term-taxonomy",
-            "privilege": "index",
-            "pages": {
-              "termTaxonomyCreate": {
-                "label": "New Term Taxonomy",
-                "uri": "/edm-admin/term-taxonomy/create",
-                "resource": "term-taxonomy",
-                "privilege": "create"
-              }
+      }
+    },
+    "system": {
+      "label": "System",
+      "uri": "/edm-admin",
+      "pages": {
+        "term_taxonomy": {
+          "label": "Term Taxonomies",
+          "uri": "/edm-admin/term-taxonomy/index",
+          "resource": "term-taxonomy",
+          "privilege": "index",
+          "pages": {
+            "termTaxonomyCreate": {
+              "label": "New Term Taxonomy",
+              "uri": "/edm-admin/term-taxonomy/create",
+              "resource": "term-taxonomy",
+              "privilege": "create"
             }
-          },
-          "term": {
-            "label": "Terms",
-            "uri": "/edm-admin/term/index",
-            "resource": "term",
-            "privilege": "index"
-          },
-          "users": {
-            "label": "Users",
-            "uri": "/edm-admin/user/index",
-            "resource": "user",
-            "privilege": "index",
-            "pages": {
-              "userCreate": {
-                "label": "Add a User",
-                "uri": "/edm-admin/user/create",
-                "resource": "user",
-                "privilege": "create"
-              }
+          }
+        },
+        "term": {
+          "label": "Terms",
+          "uri": "/edm-admin/term/index",
+          "resource": "term",
+          "privilege": "index"
+        },
+        "users": {
+          "label": "Users",
+          "uri": "/edm-admin/user/index",
+          "resource": "user",
+          "privilege": "index",
+          "pages": {
+            "userCreate": {
+              "label": "Add a User",
+              "uri": "/edm-admin/user/create",
+              "resource": "user",
+              "privilege": "create"
             }
           }
         }

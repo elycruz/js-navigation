@@ -1,32 +1,41 @@
 import Page, {isPage} from '../src/Page';
 import {PAGES_SET_INTERNAL, UUID, UUID_SET} from '../src/Symbols';
-import {peek, log, isNumber, isSet} from 'fjl';
+import {of, isNumber, isSet} from 'fjl';
 
 describe ('#Page', () => {
-    const propTypeAndNameList = [[String, 'label'],
-        [String, 'fragment'],
-        [Object, 'htmlAttribs'],
-        [Number, 'order'],
-        [String, 'resource'],
-        [String, 'privilege'],
-        [Boolean, 'active'],
-        [Boolean, 'visible'],
-        [String, 'type']
-
+    const propTypeAndNameList = [
+        [String,    'label'],
+        [String,    'fragment'],
+        [Object,    'htmlAttribs'],
+        [String,    'resource'],
+        [String,    'privilege'],
+        [Boolean,   'visible'],
+        [Boolean,   'active'],
+        [Number,    'order'],
+        [String,    'type'],
+        [Page,      'parent'],
+        [Page,      'navContainer'],
+        [Boolean,   'requiresOrdering'],
+        [Boolean,   'requiresActivityEvaluation']
     ];
 
     test ('should be an instance of `Page`', () => {
         expect(new Page()).toBeInstanceOf(Page);
     });
+
     test ('should have expected properties that only allow expected types', () => {
         propTypeAndNameList.forEach(([Type, key]) => {
             const page = new Page();
-            const someValue = Type();
+            const someValue = new Type();
             expect(page.hasOwnProperty(key)).toEqual(true);
             page[key] = someValue;
             expect(page[key]).toEqual(someValue);
             expect(() => { page[key] = null; }).toThrow(Error);
         });
+    });
+
+    test ('It should have a read-only `size` property which returns a number', () => {
+        expect(isNumber((new Page()).size)).toEqual(true);
     });
 
     test ('should have `UUID`, `PAGES_SET_INTERNAL` and `UUID_SET` privately set (via symbols)', () => {

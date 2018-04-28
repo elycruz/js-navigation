@@ -1,8 +1,7 @@
 /**
  * @module jsNavigation.Navigation
  */
-import {assign, assignDeep, partition, objComplement as complement} from 'fjl';
-import {defineEnumProps$} from 'fjl-mutable';
+import {assignDeep, partition, objComplement as complement} from 'fjl';
 import MvcPage from './MvcPage';
 import UriPage from './UriPage';
 import Page, {isPage} from './Page';
@@ -34,8 +33,7 @@ export const
         if (!pages) {
             return parent;
         }
-
-        parent.pages = pages.map(page => {
+        pages.forEach(page => {
             const _isPage = isPage(page);
             if (_isPage && hasPage(page, parent)) {
                 return page;
@@ -44,8 +42,8 @@ export const
             if (_page.pages) {
                 addPages(_page.pages, _page);
             }
-            return _page;
         });
+        return parent;
     },
 
     hasPage = (page, container) =>
@@ -95,6 +93,7 @@ export const
         findPagesByProp(prop, value, container).shift(),
 
     sortByOrdering = (ascendingBln, container) => {
+
         return container;
     }
 
@@ -103,28 +102,11 @@ export const
 export default class Navigation extends Page {
     constructor (props) {
         super();
-
-        // Define props
-        defineEnumProps$([
-            [Boolean, 'needsOrdering', false],
-            [Boolean, 'needsActivityEvaluate', false]
-        ], this);
-
-        // Define read-only prop
-        Object.defineProperty(this, 'size', {
-            get: function () { return this[PAGES_SET_INTERNAL].size; },
-            enumerable: true
-        });
-
-        // Listeners (not defined via 'definePropert(ies|y)' so we can
-        // eliminate one functional call (getter/setter etc...)
-        this.orderChanged = () => { this.needsOrdering = true; };
-        this.activeChanged = () => { this.needsActivityEvaluate = true; };
-
-        // Merge incoming props
         if (props) {
-            assignDeep(complement({pages: null}, props));
-            addPages(props.pages, this);
+            assignDeep(complement({pages: null}, props)); // merge all but pages
+            if (props.pages) {
+                addPages(props.pages, this);
+            }
         }
     }
 }

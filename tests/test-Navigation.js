@@ -1,4 +1,4 @@
-import Navigation, {normalizePage} from '../src/Navigation';
+import Navigation, {normalizePage, addPage, addPages} from '../src/Navigation';
 import Page from '../src/Page';
 import {isNumber} from 'fjl';
 
@@ -8,9 +8,6 @@ describe ('#Navigation', () => {
     });
     test ('should be an instance of `Page`', () => {
         expect(new Navigation()).toBeInstanceOf(Page);
-    });
-    test ('It should have a read-only `size` property which returns a number', () => {
-        expect(isNumber((new Navigation()).size)).toEqual(true);
     });
 
     describe ('#normalizePage', () => {
@@ -28,6 +25,29 @@ describe ('#Navigation', () => {
             Object.keys(subj).forEach(key => {
                 expect(result[key]).toEqual(subj[key]);
             });
+        });
+    });
+
+    describe ('#addPage', () => {
+        const pageInfo = {
+                uri: '/hello/world'
+            },
+            nav = new Navigation(),
+            [returnedPage, returnedNav] = addPage(pageInfo, nav);
+
+        it ('should return a [page, container] tuple', () => {
+            expect(returnedPage).toBeInstanceOf(Page);
+            expect(returnedNav).toEqual(nav);
+            expect(returnedNav.size).toEqual(1);
+        });
+
+        it ('should not add pages that are already added', () => {
+            addPage(returnedPage, returnedNav);
+            expect(returnedNav.size).toEqual(1);
+        });
+
+        it ('should throw an error when receiving non-object type values', () => {
+            expect(() => addPage(99, returnedNav)).toThrow(Error);
         });
     });
 });

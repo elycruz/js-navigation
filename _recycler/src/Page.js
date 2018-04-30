@@ -1,41 +1,15 @@
-import {defineEnumProps, errorIfNotTypeOnTarget$} from 'fjl-mutable';
-import {assignDeep, compose} from 'fjl';
-import {PAGES_SET_INTERNAL, UUID, UUID_SET} from './Symbols';
-import {uuid} from './utils';
+import {defineEnumProps, defineProps, errorIfNotTypeOnTarget$} from 'fjl-mutable';
+import {assignDeep, instanceOf} from 'fjl';
+import {PAGES_SET_INTERNAL, PAGES_GENERATED, UUID, UUID_SET} from '../../src/Symbols';
+import {uuid, errorIfNotInstanceOf$} from '../../src/utils';
 
-const PAGES_GENERATED = Symbol('pages_generated');
-
-export const
-
-    errorIfNotInstanceOf$ = (ExpectedType, context, propName, propValue) => {
-        if (propValue instanceof ExpectedType) {
-            return;
-        }
-        const ContextName = context.constructor.name;
-        throw new Error(
-            `${ContextName}.${propName} is not ` +
-            `an instance of ${ExpectedType.name}.  Value received: ${propValue}`
-        );
-    },
-
-    isPage = x => x instanceof Page,
-
-    getPages = container =>
-        Array.from(container[PAGES_SET_INTERNAL].values()),
-
-    orderPages = pages => pages.map(page => {
-
-    }),
-
-    refreshActivityOnPages = (activePage, pages) => {
-        // Set all pages to 'active: false' except active page
-        return pages.map();
-    }
-
-;
+export const isPage = instanceOf(Page);
 
 export default class Page {
     constructor(props) {
+        if (props) {
+            errorIfNotInstanceOf$(Object, this, 'props', props);
+        }
         const _uuid = uuid();
         let _active,
             _order = _uuid,
@@ -48,7 +22,10 @@ export default class Page {
             [String,    'resource'],
             [String,    'privilege'],
             [Boolean,   'visible'],
-            [String,    'type'],
+            [String,    'type']
+        ], this);
+
+        defineProps([
             [Boolean,   'requiresOrdering', false],
             [Boolean,   'requiresActivityEvaluation', false]
         ], this);
@@ -91,14 +68,18 @@ export default class Page {
                     let pages = getPages(this);
                     if (this.requiresOrdering) {
                         pages = orderPages(pages);
+                        this.requiresOrdering = false;
                     }
                     if (this.requiresActivityEvaluation) {
                         pages = refreshActivityOnPages(pages);
+                        this.requiresActivityEvaluation = false;
                     }
                     this[PAGES_GENERATED] = pages;
                     return pages;
                 },
+                set: () => ({}),
                 enumerable: true
+
             },
             size: {
                 get: function () { return this[PAGES_SET_INTERNAL].size; },
@@ -109,8 +90,7 @@ export default class Page {
                 set: x => {
                     errorIfNotInstanceOf$(Page, this, 'parent', x);
                     _parent = x;
-                },
-                enumerable: true
+                }
             },
             navContainer: {
                 get: () => _navContainer,
@@ -125,7 +105,8 @@ export default class Page {
             [UUID_SET]: {value: new Set()}            // Set for storing fast list for searching for pages.
         });
 
-        assignDeep(props);
+        if (props) {
+            assignDeep(props);
+        }
     }
-
 }

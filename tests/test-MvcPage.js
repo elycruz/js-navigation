@@ -1,5 +1,4 @@
-import MvcPage from '../src/MvcPage';
-import Page from '../src/Page';
+import {MvcPage, Page} from '../src/JsNavigation';
 // import {peek, log} from 'fjl';
 
 describe ('#MvcPage', () => {

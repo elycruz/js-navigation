@@ -1,6 +1,6 @@
-import Page, {isPage} from '../src/Page';
+import {Page, isPage} from '../src/JsNavigation';
 import {PAGES_SET_INTERNAL, UUID, UUID_SET} from '../src/Symbols';
-import {of, isNumber, isSet} from 'fjl';
+import {isNumber, isSet} from 'fjl';
 
 describe ('#Page', () => {
     const propTypeAndNameList = [

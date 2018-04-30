@@ -1,17 +1,11 @@
 /**
  * @module jsNavigation.Navigation
  */
-import {assignDeep, partition, objComplement as complement} from 'fjl';
+import {assignDeep, partition, objComplement as complement, instanceOf, sortOn, toArray} from 'fjl';
 import MvcPage from './MvcPage';
 import UriPage from './UriPage';
 import Page, {isPage} from './Page';
-import {PAGES_SET_INTERNAL} from './Symbols';
-
-const
-
-    getPageSetFor = container => container[PAGES_SET_INTERNAL]
-
-;
+import {PAGES_SET_INTERNAL} from '../../src/Symbols';
 
 export const
 
@@ -44,6 +38,19 @@ export const
             }
         });
         return parent;
+    };
+
+export const
+
+    getPageSetFor = container => container[PAGES_SET_INTERNAL],
+
+    getPages = container => toArray(container[PAGES_SET_INTERNAL]),
+
+    orderPages = sortOn(page => page.order),
+
+    refreshActivityOnPages = (activePage, pages) => {
+        // Set all pages to 'active: false' except active page
+        return pages.map(page => page);
     },
 
     hasPage = (page, container) =>
@@ -93,7 +100,6 @@ export const
         findPagesByProp(prop, value, container).shift(),
 
     sortByOrdering = (ascendingBln, container) => {
-
         return container;
     }
 
@@ -105,8 +111,13 @@ export default class Navigation extends Page {
         if (props) {
             assignDeep(complement({pages: null}, props)); // merge all but pages
             if (props.pages) {
-                addPages(props.pages, this);
+                this.addPages(props.pages);
             }
         }
     }
+
+    addPages (pages) {
+        return addPages(pages, this);
+    }
+
 }

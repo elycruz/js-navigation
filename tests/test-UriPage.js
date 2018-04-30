@@ -1,5 +1,4 @@
-import UriPage from '../src/UriPage';
-import Page from '../src/Page';
+import {Page, UriPage} from '../src/JsNavigation';
 import {log, jsonClone} from 'fjl';
 import exampleNavConfig1 from './fixtures/example-navigation-1.json';
 import util from 'util';

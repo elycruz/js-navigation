@@ -112,4 +112,18 @@ describe ('#Navigation', () => {
         });
     });
 
+    describe ('#hasPage', () => {
+        it ('should return `false` when it doesn\'t contain page', () => {
+
+        });
+
+        it ('should return `true` when it contains page', () => {
+
+        });
+
+        it ('should "do something" when cannot operate on given `page`', () => {
+
+        });
+    });
+
 });

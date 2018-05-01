@@ -1,6 +1,6 @@
 import {uuid, errorIfNotInstanceOf$} from './utils';
 import {defineEnumProps$, defineProps$, errorIfNotTypeOnTarget$} from 'fjl-mutable';
-import {toArray, instanceOf, sortOn, partition, assignDeep} from 'fjl';
+import {instanceOf, sortOn, partition, assignDeep} from 'fjl';
 import {PAGES_SET_INTERNAL, UUID, UUID_SET, PAGES_GENERATED} from './Symbols';
 
 export class Page {
@@ -24,10 +24,8 @@ export class Page {
             [String,    'type']
         ], this);
 
-        // Define non-enumerable properties
         defineProps$([ [Boolean,   'requiresOrdering', true] ], this);
 
-        // `order` changed callback
         this.orderChanged = () => {
             if (this.requiresOrdering) { return; }
             this.requiresOrdering = true;
@@ -70,7 +68,7 @@ export class Page {
                     if (this[PAGES_GENERATED] && !this.requiresOrdering) {
                         return this[PAGES_GENERATED];
                     }
-                    let pages = orderPages(getPages(this));
+                    let pages = orderPages(Array.from(getInternalPageSet(this)));
                     this.requiresOrdering = false;
                     this[PAGES_GENERATED] = pages;
                     return pages;
@@ -161,7 +159,7 @@ export const
 
     isPage = instanceOf(Page),
 
-    normalizePage = (page, otherProps, AuxType = Page) => {
+    normalizePage = (page, otherProps, AuxiliaryType = Page) => {
         const merged = assignDeep(page, otherProps);
         if (isPage(page)) { return merged; }
         switch (page.type) {
@@ -170,18 +168,16 @@ export const
             case 'uri':
                 return new UriPage(merged);
             default:
-                return new AuxType(merged);
+                return new AuxiliaryType(merged);
         }
     },
 
-    addPage = (page, container, notifyOrderChange = true) => {
+    addPage = (page, container) => {
         errorIfNotInstanceOf$(Object, 'JsNavigation.addPage', 'page', page);
+        errorIfNotInstanceOf$(Object, 'JsNavigation.addPage', 'container', container);
         const _page = normalizePage(page, {parent: container});
         getInternalPageSet(container).add(_page);
         getInternalUuidSet(container).add(_page[UUID]);
-        if (notifyOrderChange) {
-            container.orderChanged();
-        }
         return [_page, container];
     },
 
@@ -189,7 +185,6 @@ export const
         if (!pages || !pages.length) {
             return parent;
         }
-        const {size} = parent;
         pages.forEach(page => {
             const _isPage = isPage(page);
             if (_isPage && hasPage(page, parent)) {
@@ -197,10 +192,6 @@ export const
             }
             addPage(page, parent, false);
         });
-        // Items were added, notify of order change
-        if (size !== parent.size) {
-            parent.orderChanged();
-        }
         return parent;
     },
 
@@ -208,9 +199,8 @@ export const
         getInternalUuidSet(container).has(page[UUID]),
 
     removePage = (page, container) => {
-        const s = getInternalPageSet(container);
-        if (s.has(page)) {
-            s.delete(page);
+        if (hasPage(page, container)) {
+            getInternalPageSet(container).delete(page);
             container.orderChanged();
         }
         return container;
@@ -227,25 +217,18 @@ export const
 
     removePagesBy = (pred, container) => {
         const s = getInternalPageSet(container),
-            partitioned = partition(pred, Array.from(s.values()))[1];
+            partitioned = partition(pred, Array.from(s))[1];
         s.clear();
         partitioned.forEach(x => s.add(x));
         container.orderChanged();
         return container;
     },
 
-    findPagesBy = (pred, container) => {
-        const s = getInternalPageSet(container);
-        return !s ? undefined :
-            Array.from(s.values()).filter(pred);
-    },
+    findPagesBy = (pred, container) =>
+        Array.from(getInternalPageSet(container)).filter(pred),
 
-    findPagesByProp = (name, value, container) => {
-        const s = getInternalPageSet(container);
-        return !s ? undefined :
-            Array.from(s.values())
-                .filter(x => x[name] === value);
-    },
+    findPagesByProp = (name, value, container) =>
+        Array.from(getInternalPageSet(container)).filter(x => x[name] === value),
 
     findPageBy = (pred, container) =>
         findPagesBy(pred, container).shift(),
@@ -253,15 +236,12 @@ export const
     findPageByProp = (prop, value, container) =>
         findPagesByProp(prop, value, container).shift(),
 
-    getPages = container => toArray(container[PAGES_SET_INTERNAL]),
-
     orderPages = sortOn(page => page.order),
 
     setActivePage = (activePage, container) => {
         if (!container.size || !hasPage(activePage, container)) {
             return container;
         }
-        // Set all pages to 'active: false' except active page
         container.pages = container.pages.map(page => {
             if (page[UUID] !== activePage[UUID]) {
                 page.active = false;

@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "fjl": "^0.24.0",
+    "fjl-error-throwing": "^0.7.7",
     "fjl-mutable": "^0.17.0"
   },
   "devDependencies": {

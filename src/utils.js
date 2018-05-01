@@ -1,3 +1,5 @@
+import {typeOf, isString} from 'fjl';
+
 let _uuid = 0;
 
 export const
@@ -8,10 +10,11 @@ export const
         if (propValue instanceof ExpectedType) {
             return;
         }
-        const ContextName = context.constructor.name;
+        const ContextName = isString(context) ? context : context.constructor.name;
         throw new Error(
             `${ContextName}.${propName} is not ` +
-            `an instance of ${ExpectedType.name}.  Value received: ${propValue}`
+            `an instance of ${ExpectedType.name}.  Type received: ${typeOf(propValue)}; ` +
+            `Value received: ${propValue}`
         );
     }
 

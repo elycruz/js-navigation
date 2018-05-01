@@ -11,7 +11,7 @@ describe ('#UriPage', () => {
 
     test ('should be an instance of `Page`', () => {
         const instance = new UriPage(exampleNavConfig1);
-        log(util.inspect(jsonClone(instance), {depth: 10}));
+        // log(util.inspect(jsonClone(instance), {depth: 10}));
         expect(instance).toBeInstanceOf(Page);
     });
 

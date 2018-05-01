@@ -1,6 +1,6 @@
 import {uuid, errorIfNotInstanceOf$} from './utils';
 import {defineEnumProps$, defineProps$, errorIfNotTypeOnTarget$} from 'fjl-mutable';
-import {toArray, instanceOf, sortOn, partition, assignDeep, objComplement as complement} from 'fjl';
+import {toArray, instanceOf, sortOn, partition, assignDeep} from 'fjl';
 import {PAGES_SET_INTERNAL, UUID, UUID_SET, PAGES_GENERATED} from './Symbols';
 
 export class Page {
@@ -11,8 +11,7 @@ export class Page {
         const _uuid = uuid();
         let _active,
             _order = _uuid,
-            _parent,
-            _navContainer;
+            _parent;
 
         // Define enumerable properties
         defineEnumProps$([
@@ -21,28 +20,29 @@ export class Page {
             [Object,    'htmlAttribs'],
             [String,    'resource'],
             [String,    'privilege'],
-            [Boolean,   'visible'],
+            [Boolean,   'visible', true],
             [String,    'type']
         ], this);
 
         // Define non-enumerable properties
-        defineProps$([
-            [Boolean,   'requiresOrdering', true],
-            [Boolean,   'requiresActivityEvaluation', true]
-        ], this);
+        defineProps$([ [Boolean,   'requiresOrdering', true] ], this);
 
-        // Listeners (not defined via 'definePropert(ies|y)' so we can
-        // eliminate one functional call (getter/setter etc...)
         // `order` changed callback
         this.orderChanged = () => {
             if (this.requiresOrdering) { return; }
             this.requiresOrdering = true;
+            if (this.parent) {
+                this.parent.orderChanged();
+            }
         };
 
         // `active` changed callback
         this.activeChanged = () => {
             if (this.requiresActivityEvaluation) { return; }
             this.requiresActivityEvaluation = true;
+            if (this.parent) {
+                this.parent.activeChanged();
+            }
         };
 
         // Define "special case" properties
@@ -67,23 +67,19 @@ export class Page {
             },
             pages: {
                 get: () => {
-                    if (this[PAGES_GENERATED] && !this.requiresActivityEvaluation && !this.requiresOrdering) {
+                    if (this[PAGES_GENERATED] && !this.requiresOrdering) {
                         return this[PAGES_GENERATED];
                     }
-                    let pages = getPages(this);
-                    if (this.requiresOrdering) {
-                        pages = orderPages(pages);
-                        this.requiresOrdering = false;
-                    }
-                    // if (this.requiresActivityEvaluation) {
-                    //     pages = setActivePage(pages);
-                    //     this.requiresActivityEvaluation = false;
-                    // }
+                    let pages = orderPages(getPages(this));
+                    this.requiresOrdering = false;
                     this[PAGES_GENERATED] = pages;
                     return pages;
                 },
+                set: pages => {
+                    removePages(null, this);
+                    addPages(pages, this);
+                },
                 enumerable: true
-
             },
             size: {
                 get: function () { return this[PAGES_SET_INTERNAL].size; }
@@ -94,14 +90,6 @@ export class Page {
                     errorIfNotInstanceOf$(Page, this, 'parent', x);
                     _parent = x;
                 }
-            },
-            navContainer: {
-                get: () => _navContainer,
-                set: x => {
-                    errorIfNotInstanceOf$(Page, this, 'navContainer', x);
-                    _navContainer = x;
-                },
-                enumerable: true
             },
             [UUID]: {value: _uuid},
             [PAGES_SET_INTERNAL]: {value: new Set()}, // Set for storing a unique set of add pages.
@@ -122,7 +110,6 @@ export class UriPage extends Page {
         defineEnumProps$([
             [String, 'uri', '#']
         ], this);
-        assignDeep(this, props);
         mergePropsOnPageContainer(props, this);
         this.type = 'uri';
     }
@@ -143,15 +130,24 @@ export class MvcPage extends Page {
             [Boolean,'useRouteMatch', false],
             [Object, 'router']
         ], this);
-        assignDeep(this, props);
         mergePropsOnPageContainer(props, this);
         this.type = 'mvc';
     }
 }
 
-export class Navigation extends Page {}
+export class Navigation extends Page {
+    constructor (props) {
+        super(props);
+        this.visible = false; // is a page but used only for structure (navContainer)
+    }
+}
 
-const getInternalPageSet = container => container[PAGES_SET_INTERNAL];
+const
+
+    getInternalPageSet = container => container[PAGES_SET_INTERNAL],
+
+    getInternalUuidSet = container => container[UUID_SET]
+;
 
 export const
 
@@ -159,53 +155,63 @@ export const
         if (!props) {
             return container;
         }
-        assignDeep(complement({pages: null}, props)); // merge all but pages
-        if (props.pages) {
-            addPages(props.pages, container);
-        }
+        assignDeep(container, props);
         return container;
     },
 
     isPage = instanceOf(Page),
 
-    normalizePage = page =>
-        isPage(page) ? page :
-            (new (page.type === 'mvc' ? MvcPage : UriPage)(page)),
+    normalizePage = (page, otherProps, AuxType = Page) => {
+        const merged = assignDeep(page, otherProps);
+        if (isPage(page)) { return merged; }
+        switch (page.type) {
+            case 'mvc':
+                return new MvcPage(merged);
+            case 'uri':
+                return new UriPage(merged);
+            default:
+                return new AuxType(merged);
+        }
+    },
 
-    addPage = (page, container) => {
-        const {orderChanged, activeChanged} = container,
-            _page = normalizePage(page);
-        _page.parent = container;
-        _page.orderChanged = orderChanged;
-        _page.activeChanged = activeChanged;
+    addPage = (page, container, notifyOrderChange = true) => {
+        errorIfNotInstanceOf$(Object, 'JsNavigation.addPage', 'page', page);
+        const _page = normalizePage(page, {parent: container});
         getInternalPageSet(container).add(_page);
+        getInternalUuidSet(container).add(_page[UUID]);
+        if (notifyOrderChange) {
+            container.orderChanged();
+        }
         return [_page, container];
     },
 
     addPages = (pages, parent) => {
-        if (!pages) {
+        if (!pages || !pages.length) {
             return parent;
         }
+        const {size} = parent;
         pages.forEach(page => {
             const _isPage = isPage(page);
             if (_isPage && hasPage(page, parent)) {
-                return page;
+                return;
             }
-            const [_page] = addPage(page, parent);
-            if (_page.pages) {
-                addPages(_page.pages, _page);
-            }
+            addPage(page, parent, false);
         });
+        // Items were added, notify of order change
+        if (size !== parent.size) {
+            parent.orderChanged();
+        }
         return parent;
     },
 
     hasPage = (page, container) =>
-        findPageBy(_page => _page === page, container),
+        getInternalUuidSet(container).has(page[UUID]),
 
     removePage = (page, container) => {
         const s = getInternalPageSet(container);
         if (s.has(page)) {
             s.delete(page);
+            container.orderChanged();
         }
         return container;
     },
@@ -215,6 +221,7 @@ export const
             return removePagesBy(page => pages.includes(page), container);
         }
         getInternalPageSet(container).clear();
+        container.orderChanged();
         return container;
     },
 
@@ -223,6 +230,7 @@ export const
             partitioned = partition(pred, Array.from(s.values()))[1];
         s.clear();
         partitioned.forEach(x => s.add(x));
+        container.orderChanged();
         return container;
     },
 
@@ -245,17 +253,22 @@ export const
     findPageByProp = (prop, value, container) =>
         findPagesByProp(prop, value, container).shift(),
 
-    sortByOrdering = (ascendingBln, container) => {
-        return container;
-    },
-
     getPages = container => toArray(container[PAGES_SET_INTERNAL]),
 
     orderPages = sortOn(page => page.order),
 
-    setActivePage = (activePage, pages) => {
+    setActivePage = (activePage, container) => {
+        if (!container.size || !hasPage(activePage, container)) {
+            return container;
+        }
         // Set all pages to 'active: false' except active page
-        return pages.map(page => page);
+        container.pages = container.pages.map(page => {
+            if (page[UUID] !== activePage[UUID]) {
+                page.active = false;
+            }
+            return setActivePage(activePage, page);
+        });
+        return container;
     }
 
 ;

@@ -1,4 +1,4 @@
-import {Page, isPage} from '../src/JsNavigation';
+import {Navigation, Page, isPage} from '../src/JsNavigation';
 import {PAGES_SET_INTERNAL, UUID, UUID_SET} from '../src/Symbols';
 import {isNumber, isSet} from 'fjl';
 
@@ -14,9 +14,7 @@ describe ('#Page', () => {
         [Number,    'order'],
         [String,    'type'],
         [Page,      'parent'],
-        [Page,      'navContainer'],
-        [Boolean,   'requiresOrdering'],
-        [Boolean,   'requiresActivityEvaluation']
+        [Boolean,   'requiresOrdering']
     ];
 
     test ('should be an instance of `Page`', () => {

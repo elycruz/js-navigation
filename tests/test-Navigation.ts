@@ -1,7 +1,17 @@
 import {log, jsonClone} from 'fjl';
-import {Navigation, Page, UriPage, MvcPage, normalizePage, addPage, addPages} from '../src/JsNavigation';
+import {Navigation, Page, UriPage, MvcPage,
+    normalizePage, addPage, addPages, hasPage} from '../src/JsNavigation';
 import * as exampleNavConfig from './fixtures/example.cms.navigation.json';
+import * as exampleNavConfig1 from './fixtures/example-navigation-1.json';
 import {inspect} from 'util';
+
+const provideExampleNavigation = () => {
+        return new Navigation(exampleNavConfig);
+    },
+    provideExampleNavigation1 = () => {
+        return new Navigation(exampleNavConfig1);
+    }
+;
 
 describe ('#Navigation', () => {
     test ('should be an instance of `Navigation`', () => {
@@ -13,10 +23,10 @@ describe ('#Navigation', () => {
     });
 
     describe ('#normalizePage', () => {
-        test ('should return an instance of `Page` whether or not the incoming value is an instance of `Page`', () => {
+        test ('should return an instance of `Page` when receiving an object', () => {
             expect(normalizePage({})).toBeInstanceOf(Page);
         });
-        test ('should return an object which has all incoming values on the outgoing object', () => {
+        test ('should return an object containing all incoming values on the outgoing object', () => {
             const subj = {
                 reactComponentPath: './components/SomeReactComponent',
                 order: 99,
@@ -28,19 +38,18 @@ describe ('#Navigation', () => {
                 expect(result[key]).toEqual(subj[key]);
             });
         });
-        it ('should construct an object of the correct type when incoming object\'s `type` property is ' +
-            'set to "mvc" or "uri"', () => {
+        it ('should construct an object of the correct type when incoming object\'s `type` property is set to "mvc" or "uri"', () => {
             expect(normalizePage({ type: 'mvc' })).toBeInstanceOf(MvcPage);
             expect(normalizePage({ type: 'uri' })).toBeInstanceOf(UriPage);
+            expect(normalizePage({ type: '' })).toBeInstanceOf(Page);
+            expect(normalizePage({ type: 'navigation'})).toBeInstanceOf(Page);
         });
-        it ('should return an object constructed with the available/passed `AuxillaryType` constructor (3rd parameter)' +
-            ' when `type` property is not set or said property is not set to one of "mvc" or "uri"', () => {
+        it ('should return an object constructed `AuxillaryType` constructor (3rd parameter) when `type` property is not set or said property is not one of the available enums for the property', () => {
             class AbcPage extends Page {}
             expect(normalizePage({ })).toBeInstanceOf(Page); // Default `AuxType` is `Page`
             expect(normalizePage({ }, null, AbcPage)).toBeInstanceOf(AbcPage);
         });
-        it ('should construct an object of the correct type with the incoming props merged in on resulting object' +
-            'set to "mvc" or "uri"', () => {
+        it ('should construct an object of the correct type with the incoming props merged in on resulting object.', () => {
             const someNavObj = new Navigation();
             (<Array<[PageLike, PageLike]>>[
                 [normalizePage({type: 'mvc'}, {parent: someNavObj}), MvcPage],
@@ -86,14 +95,14 @@ describe ('#Navigation', () => {
             expect(result).toBeInstanceOf(Navigation);
             expect(result).toBeInstanceOf(Page);
 
-            const expectPageValues = (configPages, resultPages) => {
-                configPages.forEach((p1, ind) => {
-                    const resultPage = resultPages[ind];
+            const expectPageValues = (ps1, ps2) => {
+                ps1.forEach((p1, ind) => {
+                    const p2 = ps2[ind];
                     Object.keys(p1)
                         .filter(key => key !== 'pages')
-                        .forEach(key => expect(p1[key] === resultPage[key]).toEqual(true));
+                        .forEach(key => expect(p1[key] === p2[key]).toEqual(true));
                     if (p1.pages) {
-                        expectPageValues(p1.pages, resultPage.pages);
+                        expectPageValues(p1.pages, p2.pages);
                     }
                 });
             };
@@ -104,14 +113,22 @@ describe ('#Navigation', () => {
     });
 
     describe ('#hasPage', () => {
-        const container1 = {};
-        [
-            ['exist_in_popluted===true', ]
-        ].forEach(([descr, args, expected]) => {
-            it (descr, () => {
-
+        const nav = provideExampleNavigation(),
+            nav1 = provideExampleNavigation1(),
+            navPage1 = nav1.pages[0],
+            navPage = nav.pages[0]
+        ;
+        (<Array<[string, [PageShape, PageShape], boolean]>>[
+            ['exist_in_populated===true', [navPage1, nav1], true],
+            ['exist_in_populated===false', [navPage1, nav], false],
+            ['exist_in_populated===true', [navPage, nav], true],
+            ['exist_in_populated===false', [navPage, nav1], false],
+        ])
+            .forEach(([descr, args, expected]) => {
+                it(descr, () => {
+                    expect(hasPage(...args)).toEqual(expected);
+                });
             });
-        });
 
     });
 

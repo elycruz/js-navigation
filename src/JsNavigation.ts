@@ -1,7 +1,6 @@
 import {uuid} from "./utils";
 import {instanceOf, sortOn, partition, assignDeep, objComplement} from 'fjl';
 import {PAGES_SET, UUID, UUID_SET, PAGES_GENERATED} from './Symbols';
-import Constructable = jest.Constructable;
 
 export class Page implements PageShape {
     // PagePropsLike props
@@ -153,6 +152,16 @@ export const
         }
     },
 
+    addPages = (pages: PageLike[], parent: PageShape): PageShape => {
+        if (!pages || !pages.length) {
+            return parent;
+        }
+        pages.forEach(page => {
+            addPage(page, parent);
+        });
+        return parent;
+    },
+
     addPage = (page: PageLike, container: PageShape): [PageShape, PageShape] => {
         const _page = normalizePage(page);
         _page.parent = container;
@@ -163,16 +172,6 @@ export const
         container[UUID_SET].add(_page[UUID]);
         container.orderChanged();
         return [_page, container];
-    },
-
-    addPages = (pages: PageLike[], parent: PageShape): PageShape => {
-        if (!pages || !pages.length) {
-            return parent;
-        }
-        pages.forEach(page => {
-            addPage(page, parent);
-        });
-        return parent;
     },
 
     hasPage = (page: PageShape, container: PageShape): boolean =>

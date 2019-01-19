@@ -72,18 +72,6 @@ describe ('#Navigation', () => {
             const [page] = addPage({label: 'New Page', uri: '/hello/world'}, nav);
             expect(page.parent).toEqual(nav);
         });
-
-        it ('should throw an error when receiving non-object type values for `page`', () => {
-            expect(() => addPage(99, returnedNav)).toThrow(Error);
-        });
-
-        it ('should throw an error when receiving non `Page` (container) for`container` argument', () => {
-            const page = new UriPage();
-            [99, true, false, undefined, null, -1, (() => (undefined)), []]
-                .forEach(container =>
-                    expect(() => addPage(page, container)).toThrow(Error)
-                );
-        });
     });
 
     describe ('#addPages', () => {

@@ -5,7 +5,7 @@ import {assignDeep, partition, objComplement as complement, instanceOf, sortOn, 
 import MvcPage from './MvcPage';
 import UriPage from './UriPage';
 import Page, {isPage} from './Page';
-import {PAGES_SET_INTERNAL} from '../../src/Symbols';
+import {PAGES_SET} from '../../src/Symbols';
 
 export const
 
@@ -42,9 +42,9 @@ export const
 
 export const
 
-    getPageSetFor = container => container[PAGES_SET_INTERNAL],
+    getPageSetFor = container => container[PAGES_SET],
 
-    getPages = container => toArray(container[PAGES_SET_INTERNAL]),
+    getPages = container => toArray(container[PAGES_SET]),
 
     orderPages = sortOn(page => page.order),
 

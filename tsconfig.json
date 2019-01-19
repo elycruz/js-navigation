@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es6",
+    "preserveConstEnums": true,
+    "sourceMap": true,
+    "resolveJsonModule": true
+  },
+  "files": [
+    "./src/JsNavigation.ts",
+    "./src/Symbols.ts",
+    "./src/utils.ts",
+    "./types/index.d.ts"
+  ],
+  "include": [
+    "./src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/*.spec.ts"
+  ],
+  "types": [
+    "types/index.d.ts"
+  ]
+}
+

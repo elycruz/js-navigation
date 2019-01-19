@@ -16,3 +16,4 @@ export default class UriPage extends Page {
         this.type = 'uri';
     }
 }
+

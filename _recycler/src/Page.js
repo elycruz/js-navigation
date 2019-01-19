@@ -1,6 +1,6 @@
 import {defineEnumProps, defineProps, errorIfNotTypeOnTarget$} from 'fjl-mutable';
 import {assignDeep, instanceOf} from 'fjl';
-import {PAGES_SET_INTERNAL, PAGES_GENERATED, UUID, UUID_SET} from '../../src/Symbols';
+import {PAGES_SET, PAGES_GENERATED, UUID, UUID_SET} from '../../src/Symbols';
 import {uuid, errorIfNotInstanceOf$} from '../../src/utils';
 
 export const isPage = instanceOf(Page);
@@ -82,7 +82,7 @@ export default class Page {
 
             },
             size: {
-                get: function () { return this[PAGES_SET_INTERNAL].size; },
+                get: function () { return this[PAGES_SET].size; },
                 enumerable: true
             },
             parent: {
@@ -101,7 +101,7 @@ export default class Page {
                 enumerable: true
             },
             [UUID]: {value: _uuid},
-            [PAGES_SET_INTERNAL]: {value: new Set()}, // Set for storing a unique set of add pages.
+            [PAGES_SET]: {value: new Set()}, // Set for storing a unique set of add pages.
             [UUID_SET]: {value: new Set()}            // Set for storing fast list for searching for pages.
         });
 

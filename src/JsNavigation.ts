@@ -5,17 +5,17 @@ import Constructable = jest.Constructable;
 
 export class Page implements PageShape {
     // PagePropsLike props
+    type: string;
     active = false;
+    parent: PageShape;
     order: number = 0;
     visible: boolean = true;
 
     label?: string;
-    fragment?: string;
+    fragment? = '#';
     htmlAttribs?: object;
     resource?: string;
     privilege?: string;
-    type?: string;
-    parent?: PageShape;
 
     // PageShape props
     requiresOrdering = true;
@@ -95,15 +95,19 @@ export class Page implements PageShape {
     }
 }
 
-export class UriPage extends Page {
-    uri = '#';
+export class UriPage extends Page implements DerivedPageShape {
+    readonly type = 'uri';
+    uri = '';
     constructor (props?: PageLike) {
         super(props);
-        this.type = 'uri';
+        Object.defineProperty(this, 'type', {
+            value: 'uri'
+        });
     }
 }
 
-export class MvcPage extends Page {
+export class MvcPage extends Page implements DerivedPageShape {
+    readonly type = 'mvc';
     action = 'index';
     controller = 'index';
     params: object;
@@ -113,14 +117,20 @@ export class MvcPage extends Page {
     router: object;
     constructor (props?: PageLike) {
         super(props);
-        this.type = 'mvc';
+        Object.defineProperty(this, 'type', {
+            value: 'mvc'
+        });
     }
 }
 
-export class Navigation extends Page {
+export class Navigation extends Page implements DerivedPageShape {
+    readonly visible = false;
+    readonly type = 'navigation';
     constructor (props?: PageLike) {
         super(props);
-        this.visible = false; // is a page but used only for structure (navContainer)
+        Object.defineProperty(this, 'visible', {
+            value: false // is a page but used only for structure (navContainer)
+        });
     }
 }
 

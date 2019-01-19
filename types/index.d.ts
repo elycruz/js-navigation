@@ -23,7 +23,7 @@ declare interface PageLike extends UriPageLike, MvcPageLike {
     resource?: string;
     privilege?: string;
     visible?: boolean;
-    pages?: PageLike[]
+    pages?: PageLike[];
 }
 
 declare interface PageShape extends PageLike {
@@ -60,6 +60,10 @@ declare class PageConstructor implements PageShape {
 
     orderChanged (): void;
     activeChanged (): void;
+}
+
+declare interface DerivedPageShape extends PageShape {
+    readonly type: string;
 }
 
 declare type FilterPred = (any, number?, array?) => boolean;

@@ -42,12 +42,14 @@ describe ('#Navigation', () => {
         it ('should construct an object of the correct type with the incoming props merged in on resulting object' +
             'set to "mvc" or "uri"', () => {
             const someNavObj = new Navigation();
-            [[normalizePage({type: 'mvc'}, {parent: someNavObj}), MvcPage],
+            (<Array<[PageLike, PageLike]>>[
+                [normalizePage({type: 'mvc'}, {parent: someNavObj}), MvcPage],
                 [normalizePage({type: 'uri'}, {parent: someNavObj}), UriPage]
-            ].forEach(([result, Type]) => {
-                expect(result).toBeInstanceOf(Type);
-                expect(result.parent).toEqual(someNavObj);
-            });
+            ])
+                .forEach(([result, Type]) => {
+                    expect(result).toBeInstanceOf(Type);
+                    expect(result.parent).toEqual(someNavObj);
+                });
         });
     });
 
@@ -102,17 +104,15 @@ describe ('#Navigation', () => {
     });
 
     describe ('#hasPage', () => {
-        it ('should return `false` when it doesn\'t contain page', () => {
+        const container1 = {};
+        [
+            ['exist_in_popluted===true', ]
+        ].forEach(([descr, args, expected]) => {
+            it (descr, () => {
 
+            });
         });
 
-        it ('should return `true` when it contains page', () => {
-
-        });
-
-        it ('should "do something" when cannot operate on given `page`', () => {
-
-        });
     });
 
 });

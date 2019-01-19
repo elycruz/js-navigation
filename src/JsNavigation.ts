@@ -72,6 +72,10 @@ export class Page implements PageShape {
         });
 
         assignDeep(this, props);
+
+        if (this.active) {
+            setActivePage(this);
+        }
     }
 
     orderChanged () {
@@ -127,23 +131,31 @@ export const
     normalizePage = (page: PageLike,
                      otherProps?: PageLike | null | undefined,
                      AuxiliaryType: typeof PageConstructor = Page): PageShape => {
-        const merged = assignDeep(page, otherProps);
-        if (isPage(page)) { return merged; }
+        const pageLike = otherProps ? assignDeep(page, otherProps) : page;
+        if (isPage(pageLike)) { return pageLike; }
         switch (page.type) {
             case 'mvc':
-                return new MvcPage(merged);
+                return new MvcPage(pageLike);
             case 'uri':
-                return new UriPage(merged);
+                return new UriPage(pageLike);
             default:
-                return new AuxiliaryType(merged);
+                return new AuxiliaryType(pageLike);
         }
     },
 
     addPage = (page: PageLike, container: PageShape): [PageShape, PageShape] => {
-        const _page = normalizePage(page, {parent: container});
+        const
+            _page = normalizePage(page),
+            out: [PageShape, PageShape] = [_page, container]
+        ;
+        _page.parent = container;
+        if (hasPage(_page, container)) {
+            return out;
+        }
         container[PAGES_SET].add(_page);
         container[UUID_SET].add(_page[UUID]);
-        return [_page, container];
+        container.orderChanged();
+        return out;
     },
 
     addPages = (pages: PageLike[], parent: PageShape): PageShape => {
@@ -151,20 +163,18 @@ export const
             return parent;
         }
         pages.forEach(page => {
-            if (isPage(page) && hasPage(page, parent)) {
-                return;
-            }
             addPage(page, parent);
         });
         return parent;
     },
 
     hasPage = (page: PageLike, container: PageShape): boolean =>
-        container[UUID_SET].has(page[UUID]),
+        container[UUID_SET].has(normalizePage(page)[UUID]),
 
     removePage = (page: PageLike, container: PageShape): PageShape => {
         if (hasPage(page, container)) {
             container[PAGES_SET].delete(page);
+            container[UUID_SET].delete(page[UUID]);
             container.orderChanged();
         }
         return container;
@@ -181,9 +191,14 @@ export const
 
     removePagesBy = (pred, container: PageShape): PageShape => {
         const s = container[PAGES_SET],
+            u = container[UUID_SET],
             partitioned = partition(pred, Array.from(s))[1];
         s.clear();
-        partitioned.forEach(x => s.add(x));
+        u.clear();
+        partitioned.forEach(x => {
+            s.add(x);
+            u.add(x[UUID]);
+        });
         container.orderChanged();
         return container;
     },
@@ -216,7 +231,7 @@ export const
             return pages;
         }
         return orderPages(pages.map(p => {
-            if (!p.size) {
+            if (!p.size || !p.requiresOrdering) {
                 return p;
             }
             p.pages = orderPagesRecursive(p.pages);

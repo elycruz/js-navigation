@@ -8,10 +8,14 @@
     "strictNullChecks": true
   },
   "files": [
+    "./types/index.d.ts",
     "./src/JsNavigation.ts",
     "./src/Symbols.ts",
     "./src/utils.ts",
-    "./types/index.d.ts"
+    "./tests/test-Page.ts",
+    "./tests/test-Navigation.ts",
+    "./tests/test-UriPage.ts",
+    "./tests/test-MvcPage.ts"
   ],
   "include": [
     "./src/**/*"

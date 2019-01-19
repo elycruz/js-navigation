@@ -23,11 +23,11 @@ declare interface PageLike extends UriPageLike, MvcPageLike {
     resource?: string;
     privilege?: string;
     visible?: boolean;
-    pages?: PageLike[]
+    pages?: PageLike[];
 }
 
 declare interface PageShape extends PageLike {
-    parent?: PageShape;
+    parent: PageShape;
     requiresOrdering: boolean;
     requiresActivityEvaluation: boolean;
     orderChanged(): void;
@@ -38,16 +38,17 @@ declare interface PageShape extends PageLike {
 
 declare class PageConstructor implements PageShape {
     // PagePropsLike props
-    type?: string;
+    type: string;
     active: boolean;
     order: number;
+    parent: PageShape;
+    visible: boolean;
+
     label?: string;
     fragment?: string;
     htmlAttribs?: object;
     resource?: string;
     privilege?: string;
-    visible: boolean;
-    parent?: PageShape;
 
     // PageShape props
     requiresOrdering: boolean;
@@ -61,6 +62,8 @@ declare class PageConstructor implements PageShape {
     activeChanged (): void;
 }
 
-declare type nothing = null | undefined;
+declare interface DerivedPageShape extends PageShape {
+    readonly type: string;
+}
 
 declare type FilterPred = (any, number?, array?) => boolean;

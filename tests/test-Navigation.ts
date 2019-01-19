@@ -42,8 +42,9 @@ describe ('#Navigation', () => {
         it ('should construct an object of the correct type with the incoming props merged in on resulting object' +
             'set to "mvc" or "uri"', () => {
             const someNavObj = new Navigation();
-            [[normalizePage({ type: 'mvc' }, {parent: someNavObj}), MvcPage],
-                [normalizePage({ type: 'uri' }, {parent: someNavObj}), UriPage]].forEach(([result, Type]) => {
+            [[normalizePage({type: 'mvc'}, {parent: someNavObj}), MvcPage],
+                [normalizePage({type: 'uri'}, {parent: someNavObj}), UriPage]
+            ].forEach(([result, Type]) => {
                 expect(result).toBeInstanceOf(Type);
                 expect(result.parent).toEqual(someNavObj);
             });

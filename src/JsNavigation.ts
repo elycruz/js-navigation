@@ -1,30 +1,33 @@
 import {uuid} from "./utils";
-import {instanceOf, sortOn, partition, assignDeep} from 'fjl';
+import {instanceOf, sortOn, partition, assignDeep, objComplement} from 'fjl';
 import {PAGES_SET, UUID, UUID_SET, PAGES_GENERATED} from './Symbols';
+import Constructable = jest.Constructable;
 
 export class Page implements PageShape {
     // PagePropsLike props
-    active: boolean;
-    order: number;
-    label: string;
-    fragment: string;
-    htmlAttribs: object;
-    resource: string;
-    privilege: string;
+    active = false;
+    order: number = 0;
     visible: boolean = true;
-    type: string;
-    parent: Page;
+
+    label?: string;
+    fragment?: string;
+    htmlAttribs?: object;
+    resource?: string;
+    privilege?: string;
+    type?: string;
+    parent?: PageShape;
 
     // PageShape props
-    requiresOrdering: boolean = true;
-    requiresActivityEvaluation: boolean = false;
-    size: number;
+    requiresOrdering = true;
+    requiresActivityEvaluation = false;
+    pages: PageShape[];
+    readonly size: number;
 
     constructor(props?: PageLike) {
-        const _uuid = uuid();
+        const _uuid: number = uuid();
 
         let _active = false,
-            _order;
+            _order: number;
 
         // Define "special case" properties
         Object.defineProperties(this, {
@@ -38,7 +41,7 @@ export class Page implements PageShape {
             },
             order: {
                 get: () => _order,
-                set: (x: boolean) => {
+                set: (x: number) => {
                     _order = x;
                     this.orderChanged();
                 },
@@ -54,7 +57,7 @@ export class Page implements PageShape {
                     this[PAGES_GENERATED] = pages;
                     return pages;
                 },
-                set: pages => {
+                set: (pages: PageLike[]) => {
                     removePages(null, this);
                     addPages(pages, this);
                 },
@@ -68,7 +71,6 @@ export class Page implements PageShape {
             [UUID_SET]: {value: new Set()}            // Set for storing fast list for searching for pages.
         });
 
-        // Merge props only if `props`
         assignDeep(this, props);
     }
 
@@ -122,7 +124,9 @@ export const
 
     isPage: (any) => boolean = instanceOf(Page),
 
-    normalizePage = (page: PageLike, otherProps?: PagePropsLike, AuxiliaryType = Page) => {
+    normalizePage = (page: PageLike,
+                     otherProps?: PageLike | null | undefined,
+                     AuxiliaryType: typeof PageConstructor = Page): PageShape => {
         const merged = assignDeep(page, otherProps);
         if (isPage(page)) { return merged; }
         switch (page.type) {
@@ -135,20 +139,19 @@ export const
         }
     },
 
-    addPage = (page: PageLike, container: PageLike): [PageLike, PageLike] => {
+    addPage = (page: PageLike, container: PageShape): [PageShape, PageShape] => {
         const _page = normalizePage(page, {parent: container});
         container[PAGES_SET].add(_page);
         container[UUID_SET].add(_page[UUID]);
         return [_page, container];
     },
 
-    addPages = (pages: PageLike[], parent: PageLike): PageLike => {
+    addPages = (pages: PageLike[], parent: PageShape): PageShape => {
         if (!pages || !pages.length) {
             return parent;
         }
         pages.forEach(page => {
-            const _isPage = isPage(page);
-            if (_isPage && hasPage(page, parent)) {
+            if (isPage(page) && hasPage(page, parent)) {
                 return;
             }
             addPage(page, parent);
@@ -156,10 +159,10 @@ export const
         return parent;
     },
 
-    hasPage = (page: PageLike, container: PageLike): boolean =>
+    hasPage = (page: PageLike, container: PageShape): boolean =>
         container[UUID_SET].has(page[UUID]),
 
-    removePage = (page: PageLike, container: PageLike): PageLike => {
+    removePage = (page: PageLike, container: PageShape): PageShape => {
         if (hasPage(page, container)) {
             container[PAGES_SET].delete(page);
             container.orderChanged();
@@ -167,16 +170,16 @@ export const
         return container;
     },
 
-    removePages = (pages: PageLike[], container: PageLike): PageLike => {
+    removePages = (pages: PageLike[] | null | undefined, container: PageShape): PageShape => {
         if (pages) {
-            return removePagesBy(page => pages.indexOf(page) > -1, container);
+            return removePagesBy(page => pages.includes(page), container);
         }
         container[PAGES_SET].clear();
         container.orderChanged();
         return container;
     },
 
-    removePagesBy = (pred, container) => {
+    removePagesBy = (pred, container: PageShape): PageShape => {
         const s = container[PAGES_SET],
             partitioned = partition(pred, Array.from(s))[1];
         s.clear();
@@ -185,21 +188,30 @@ export const
         return container;
     },
 
-    findPagesBy = (pred, container) =>
-        Array.from(container[PAGES_SET]).filter(pred),
+    findPagesBy = (pred: FilterPred, container: PageShape): PageShape[] =>
+        <PageShape[]>Array.from(container[PAGES_SET]).filter(pred),
 
-    findPagesByProp = (name, value, container) =>
-        Array.from(container[PAGES_SET]).filter(x => x[name] === value),
+    findPagesByProp = (name: keyof PageShape, value: any, container: PageShape): PageShape[] =>
+        findPagesBy(x => x[name] === value, container),
 
-    findPageBy = (pred, container) =>
-        findPagesBy(pred, container).shift(),
+    findPageBy = (pred: FilterPred, container: PageShape): PageShape | undefined => {
+        const ps = container.pages,
+            psLen = ps.length;
+        for (let i = 0; i < psLen; i += 1) {
+            const p = ps[i];
+            if (pred(p, i, ps)) {
+                return p;
+            }
+        }
+        return undefined;
+    },
 
-    findPageByProp = (prop, value, container) =>
+    findPageByProp = (prop: keyof PageShape, value: any, container: PageShape): PageShape | null | undefined =>
         findPagesByProp(prop, value, container).shift(),
 
-    orderPages = sortOn(page => page.order),
+    orderPages: (pages: PageLike[]) => PageLike[] = sortOn(page => page.order),
 
-    setActivePage = (activePage, container) => {
+    setActivePage = (activePage: PageShape, container: PageShape): PageShape => {
         if (!container.size || !hasPage(activePage, container)) {
             return container;
         }

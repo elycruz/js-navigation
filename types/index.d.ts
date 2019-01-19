@@ -1,16 +1,3 @@
-declare interface PagePropsLike {
-    active?: boolean;
-    order?: number;
-    parent?: PageLike;
-    label?: string;
-    fragment?: string;
-    htmlAttribs?: object;
-    resource?: string;
-    privilege?: string;
-    visible?: boolean;
-    type?: string;
-}
-
 declare interface UriPageLike {
     uri?: string;
 }
@@ -25,46 +12,55 @@ declare interface MvcPageLike {
     router?: object;
 }
 
-declare interface PageLike extends PagePropsLike, UriPageLike, MvcPageLike {
-    requiresOrdering?: boolean;
-    requiresActivityEvaluation?: boolean;
-    orderChanged?: () => void;
-    activeChanged?: () => void;
-    pages?: PageLike[],
-    size?: number;
+declare interface PageLike extends UriPageLike, MvcPageLike {
+    type?: string;
+    active?: boolean;
+    order?: number;
+    parent?: PageLike;
+    label?: string;
+    fragment?: string;
+    htmlAttribs?: object;
+    resource?: string;
+    privilege?: string;
+    visible?: boolean;
+    pages?: PageLike[]
 }
 
 declare interface PageShape extends PageLike {
-    type: string;
+    parent?: PageShape;
     requiresOrdering: boolean;
     requiresActivityEvaluation: boolean;
-    orderChanged: () => void;
-    activeChanged: () => void;
-    pages: PageLike[];
-    size: number;
+    orderChanged(): void;
+    activeChanged(): void;
+    pages: PageShape[];
+    readonly size: number;
 }
 
 declare class PageConstructor implements PageShape {
     // PagePropsLike props
+    type?: string;
     active: boolean;
     order: number;
-    label: string;
-    fragment: string;
-    htmlAttribs: object;
-    resource: string;
-    privilege: string;
+    label?: string;
+    fragment?: string;
+    htmlAttribs?: object;
+    resource?: string;
+    privilege?: string;
     visible: boolean;
-    type: string;
-    parent: PageLike;
+    parent?: PageShape;
 
     // PageShape props
     requiresOrdering: boolean;
     requiresActivityEvaluation: boolean;
     pages: PageShape[];
-    size: number;
+    readonly size: number;
 
-    constructor(props?: PagePropsLike);
+    constructor(props?: PageLike);
 
     orderChanged (): void;
     activeChanged (): void;
 }
+
+declare type nothing = null | undefined;
+
+declare type FilterPred = (any, number?, array?) => boolean;

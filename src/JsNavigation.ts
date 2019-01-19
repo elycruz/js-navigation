@@ -52,7 +52,7 @@ export class Page implements PageShape {
                     if (this[PAGES_GENERATED] && !this.requiresOrdering) {
                         return this[PAGES_GENERATED];
                     }
-                    let pages = orderPages(Array.from(this[PAGES_SET]));
+                    const pages = orderPagesRecursive(Array.from(this[PAGES_SET]));
                     this.requiresOrdering = false;
                     this[PAGES_GENERATED] = pages;
                     return pages;
@@ -209,19 +209,31 @@ export const
     findPageByProp = (prop: keyof PageShape, value: any, container: PageShape): PageShape | null | undefined =>
         findPagesByProp(prop, value, container).shift(),
 
-    orderPages: (pages: PageLike[]) => PageLike[] = sortOn(page => page.order),
+    orderPages: (pages: PageShape[]) => PageShape[] = sortOn(page => page.order),
 
-    setActivePage = (activePage: PageShape, container: PageShape): PageShape => {
-        if (!container.size || !hasPage(activePage, container)) {
-            return container;
+    orderPagesRecursive: (pages: PageShape[]) => PageShape[] = pages => {
+        if (!pages || !pages.length) {
+            return pages;
         }
-        container.pages = container.pages.map(page => {
-            if (page[UUID] !== activePage[UUID]) {
-                page.active = false;
+        return orderPages(pages.map(p => {
+            if (!p.size) {
+                return p;
             }
-            return setActivePage(activePage, page);
+            p.pages = orderPagesRecursive(p.pages);
+            return p;
+        }));
+    },
+
+    setActivePage = (activePage: PageShape) => {
+        const {parent} = activePage;
+        if (!parent || !parent.size) {
+            activePage.active = true;
+            return;
+        }
+        parent.pages.forEach(page => {
+            page.active = page[UUID] === activePage[UUID];
         });
-        return container;
+        setActivePage(parent);
     }
 
 ;

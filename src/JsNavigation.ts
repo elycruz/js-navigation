@@ -144,18 +144,15 @@ export const
     },
 
     addPage = (page: PageLike, container: PageShape): [PageShape, PageShape] => {
-        const
-            _page = normalizePage(page),
-            out: [PageShape, PageShape] = [_page, container]
-        ;
+        const _page = normalizePage(page);
         _page.parent = container;
         if (hasPage(_page, container)) {
-            return out;
+            return [_page, container];
         }
         container[PAGES_SET].add(_page);
         container[UUID_SET].add(_page[UUID]);
         container.orderChanged();
-        return out;
+        return [_page, container];
     },
 
     addPages = (pages: PageLike[], parent: PageShape): PageShape => {
@@ -168,10 +165,10 @@ export const
         return parent;
     },
 
-    hasPage = (page: PageLike, container: PageShape): boolean =>
-        container[UUID_SET].has(normalizePage(page)[UUID]),
+    hasPage = (page: PageShape, container: PageShape): boolean =>
+        container[UUID_SET].has(page[UUID]),
 
-    removePage = (page: PageLike, container: PageShape): PageShape => {
+    removePage = (page: PageShape, container: PageShape): PageShape => {
         if (hasPage(page, container)) {
             container[PAGES_SET].delete(page);
             container[UUID_SET].delete(page[UUID]);
